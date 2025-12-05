@@ -588,11 +588,10 @@
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
-    <!-- Firebase SDK for Dynamic Products -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
+    <!-- Firebase SDK for Dynamic Products (Compat version - works without server) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script>
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCp7byyzg3DCorJHrbAPKl_sVzBGT5vtw0",
@@ -603,8 +602,8 @@
             appId: "1:584342335720:web:5fa4c181406fda7822995d"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         let allProducts = [];
         let categories = [];
@@ -625,13 +624,13 @@
         // Load currency setting
         async function loadSettings() {
             try {
-                const settingsDoc = await getDoc(doc(db, 'settings', 'store'));
-                if (settingsDoc.exists()) {
+                const settingsDoc = await db.collection('settings').doc('store').get();
+                if (settingsDoc.exists) {
                     window.currencySymbol = settingsDoc.data().currencySymbol || '$';
                 } else {
                     window.currencySymbol = '$';
                 }
-            } catch {
+            } catch (e) {
                 window.currencySymbol = '$';
             }
         }
@@ -639,7 +638,7 @@
         // Load categories
         async function loadCategories() {
             try {
-                const snapshot = await getDocs(collection(db, 'categories'));
+                const snapshot = await db.collection('categories').get();
                 categories = [];
                 snapshot.forEach(doc => {
                     categories.push({ id: doc.id, ...doc.data() });
@@ -691,13 +690,13 @@
         async function loadProducts() {
             try {
                 console.log('Loading products from Firebase...');
-                const snapshot = await getDocs(collection(db, 'products'));
+                const snapshot = await db.collection('products').get();
                 allProducts = [];
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
+                snapshot.forEach(doc => {
+                    const data = doc.data();
                     console.log('Found product:', data.name, 'Status:', data.status);
                     if (data.status === 'published') {
-                        allProducts.push({ id: docSnap.id, ...data });
+                        allProducts.push({ id: doc.id, ...data });
                     }
                 });
                 
