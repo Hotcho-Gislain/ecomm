@@ -770,29 +770,42 @@
         // Load store settings
         async function loadStoreSettings() {
             try {
+                console.log('Loading store settings...');
                 const settingsDoc = await getDoc(doc(db, 'settings', 'store'));
+                console.log('Settings doc exists:', settingsDoc.exists());
+                
                 if (settingsDoc.exists()) {
                     const data = settingsDoc.data();
+                    console.log('Settings data:', data);
                     
                     // Update carousel images
                     if (data.carousel1) {
-                        document.querySelector('#header-carousel .carousel-item.active img').src = data.carousel1;
+                        const carousel1El = document.querySelector('#header-carousel .carousel-item.active img');
+                        console.log('Carousel 1 element found:', !!carousel1El);
+                        if (carousel1El) carousel1El.src = data.carousel1;
                     }
                     if (data.carousel2) {
-                        document.querySelector('#header-carousel .carousel-item:not(.active) img').src = data.carousel2;
+                        const carousel2El = document.querySelector('#header-carousel .carousel-item:not(.active) img');
+                        console.log('Carousel 2 element found:', !!carousel2El);
+                        if (carousel2El) carousel2El.src = data.carousel2;
                     }
                     
                     // Update featured section title
                     if (data.featuredTitle) {
                         const trendyTitle = document.querySelector('.section-title span');
+                        console.log('Featured title element found:', !!trendyTitle);
                         if (trendyTitle) trendyTitle.textContent = data.featuredTitle;
                     }
                     
                     // Store currency for use in product rendering
                     window.currencySymbol = data.currencySymbol || '$';
+                    console.log('Currency symbol:', window.currencySymbol);
+                } else {
+                    console.log('No settings document found in Firebase');
+                    window.currencySymbol = '$';
                 }
             } catch (error) {
-                console.log('Using default settings');
+                console.error('Error loading settings:', error);
                 window.currencySymbol = '$';
             }
         }
