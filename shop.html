@@ -292,8 +292,8 @@
 
             <!-- Shop Product Start -->
             <div class="col-lg-9 col-md-12">
-                <div class="row pb-3">
-                    <div class="col-12 pb-1">
+                <div class="row pb-3" id="shop-products">
+                    <div class="col-12 pb-1" id="shop-controls">
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <form action="">
                                 <div class="input-group">
@@ -690,14 +690,18 @@
         // Load all products
         async function loadProducts() {
             try {
+                console.log('Loading products from Firebase...');
                 const snapshot = await getDocs(collection(db, 'products'));
                 allProducts = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    console.log('Found product:', data.name, 'Status:', data.status);
                     if (data.status === 'published') {
-                        allProducts.push({ id: doc.id, ...data });
+                        allProducts.push({ id: docSnap.id, ...data });
                     }
                 });
+                
+                console.log('Total published products loaded:', allProducts.length);
                 
                 // Update filter counts
                 updateFilterCounts();
@@ -705,7 +709,7 @@
                 // Render products
                 renderProducts();
             } catch (error) {
-                console.log('Error loading products:', error);
+                console.error('Error loading products:', error);
             }
         }
 
@@ -851,6 +855,7 @@
 
         // Render products based on filters
         function renderProducts() {
+            console.log('Rendering products, total:', allProducts.length);
             let filtered = [...allProducts];
             
             // Apply category filter
@@ -901,20 +906,24 @@
                     break;
             }
             
-            // Find products container
-            const productsContainer = document.querySelector('.col-lg-9 .row.pb-3');
+            console.log('Filtered products:', filtered.length);
+            
+            // Find products container using ID
+            const productsContainer = document.getElementById('shop-products');
+            const controlsElement = document.getElementById('shop-controls');
+            
             if (productsContainer) {
-                // Keep the search bar and sort dropdown
-                const searchBar = productsContainer.querySelector('.col-12.pb-1');
+                // Save controls HTML
+                const controlsHtml = controlsElement ? controlsElement.outerHTML : '';
                 
                 // Clear and rebuild
-                productsContainer.innerHTML = '';
-                if (searchBar) productsContainer.appendChild(searchBar);
+                productsContainer.innerHTML = controlsHtml;
                 
                 if (filtered.length === 0) {
                     productsContainer.innerHTML += '<div class="col-12 text-center py-5"><p class="text-muted">No products found matching your criteria.</p></div>';
                 } else {
                     productsContainer.innerHTML += filtered.map(p => createProductCard(p)).join('');
+                    console.log('Products rendered to shop page');
                 }
                 
                 // Add pagination placeholder
@@ -962,9 +971,11 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Shop page loaded, initializing Firebase...');
             await loadSettings();
             await loadCategories();
             await loadProducts();
+            console.log('Shop page Firebase initialization complete');
         });
     </script>
 </body>

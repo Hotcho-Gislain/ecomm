@@ -313,9 +313,9 @@
     <!-- Products Start -->
     <div class="container-fluid pt-5">
         <div class="text-center mb-4">
-            <h2 class="section-title px-5"><span class="px-2">Trandy Products</span></h2>
+            <h2 class="section-title px-5"><span class="px-2">Trendy Products</span></h2>
         </div>
-        <div class="row px-xl-5 pb-3">
+        <div class="row px-xl-5 pb-3" id="trendy-products">
             <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
                 <div class="card product-item border-0 mb-4">
                     <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
@@ -484,7 +484,7 @@
         <div class="text-center mb-4">
             <h2 class="section-title px-5"><span class="px-2">Just Arrived</span></h2>
         </div>
-        <div class="row px-xl-5 pb-3">
+        <div class="row px-xl-5 pb-3" id="just-arrived">
             <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
                 <div class="card product-item border-0 mb-4">
                     <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
@@ -850,44 +850,59 @@
         // Load featured/trendy products
         async function loadFeaturedProducts() {
             try {
+                console.log('Loading products from Firebase...');
                 const snapshot = await getDocs(collection(db, 'products'));
                 const products = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    console.log('Found product:', data.name, 'Status:', data.status);
                     if (data.status === 'published') {
-                        products.push({ id: doc.id, ...data });
+                        products.push({ id: docSnap.id, ...data });
                     }
                 });
+                
+                console.log('Total published products:', products.length);
+                
+                if (products.length === 0) {
+                    console.log('No published products found in database');
+                    return;
+                }
                 
                 // Get featured products or just the first 8
                 const featured = products.filter(p => p.featured).slice(0, 8);
                 const displayProducts = featured.length >= 4 ? featured : products.slice(0, 8);
                 
-                // Update "Trendy Products" section
-                const trendySection = document.querySelectorAll('.container-fluid.pt-5 .row.px-xl-5.pb-3')[0];
+                // Update "Trendy Products" section using ID
+                const trendySection = document.getElementById('trendy-products');
+                console.log('Trendy section found:', !!trendySection);
                 if (trendySection && displayProducts.length > 0) {
                     trendySection.innerHTML = displayProducts.map(p => createProductCard(p)).join('');
+                    console.log('Trendy products rendered:', displayProducts.length);
                 }
                 
                 // Update "Just Arrived" section (newest products)
                 const sortedByDate = [...products].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                 const justArrived = sortedByDate.slice(0, 8);
                 
-                const justArrivedSection = document.querySelectorAll('.container-fluid.pt-5 .row.px-xl-5.pb-3')[1];
+                const justArrivedSection = document.getElementById('just-arrived');
+                console.log('Just Arrived section found:', !!justArrivedSection);
                 if (justArrivedSection && justArrived.length > 0) {
                     justArrivedSection.innerHTML = justArrived.map(p => createProductCard(p)).join('');
+                    console.log('Just Arrived products rendered:', justArrived.length);
                 }
                 
             } catch (error) {
-                console.log('Using static products:', error);
+                console.error('Error loading products:', error);
             }
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded, initializing Firebase...');
             await loadStoreSettings();
             await loadCategories();
             await loadFeaturedProducts();
+            console.log('Firebase initialization complete');
         });
     </script>
 </body>

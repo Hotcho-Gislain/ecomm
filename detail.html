@@ -621,8 +621,11 @@
 
         // Load product details
         async function loadProductDetails() {
+            console.log('Loading product details...');
+            console.log('Product ID from URL:', productId);
+            
             if (!productId) {
-                console.log('No product ID provided');
+                console.log('No product ID provided in URL');
                 return;
             }
 
@@ -630,11 +633,12 @@
                 const productDoc = await getDoc(doc(db, 'products', productId));
                 
                 if (!productDoc.exists()) {
-                    console.log('Product not found');
+                    console.log('Product not found in database');
                     return;
                 }
 
                 const product = { id: productDoc.id, ...productDoc.data() };
+                console.log('Product loaded:', product.name);
                 const currency = window.currencySymbol || '$';
 
                 // Update product title
@@ -791,9 +795,11 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Detail page loaded, initializing Firebase...');
             await loadSettings();
             await loadCategories();
             await loadProductDetails();
+            console.log('Detail page initialization complete');
         });
     </script>
 </body>
