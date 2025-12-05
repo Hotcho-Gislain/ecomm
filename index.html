@@ -144,8 +144,7 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
-                            <a href="" class="nav-item nav-link">Login</a>
-                            <a href="" class="nav-item nav-link">Register</a>
+                            <a href="admin.html" class="nav-item nav-link">Admin</a>
                         </div>
                     </div>
                 </nav>
@@ -750,6 +749,147 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Firebase SDK for Dynamic Products -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCp7byyzg3DCorJHrbAPKl_sVzBGT5vtw0",
+            authDomain: "ecommsample-8c169.firebaseapp.com",
+            projectId: "ecommsample-8c169",
+            storageBucket: "ecommsample-8c169.firebasestorage.app",
+            messagingSenderId: "584342335720",
+            appId: "1:584342335720:web:5fa4c181406fda7822995d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Load store settings
+        async function loadStoreSettings() {
+            try {
+                const settingsDoc = await getDoc(doc(db, 'settings', 'store'));
+                if (settingsDoc.exists()) {
+                    const data = settingsDoc.data();
+                    
+                    // Update carousel images
+                    if (data.carousel1) {
+                        document.querySelector('#header-carousel .carousel-item.active img').src = data.carousel1;
+                    }
+                    if (data.carousel2) {
+                        document.querySelector('#header-carousel .carousel-item:not(.active) img').src = data.carousel2;
+                    }
+                    
+                    // Update featured section title
+                    if (data.featuredTitle) {
+                        const trendyTitle = document.querySelector('.section-title span');
+                        if (trendyTitle) trendyTitle.textContent = data.featuredTitle;
+                    }
+                    
+                    // Store currency for use in product rendering
+                    window.currencySymbol = data.currencySymbol || '$';
+                }
+            } catch (error) {
+                console.log('Using default settings');
+                window.currencySymbol = '$';
+            }
+        }
+
+        // Load categories for sidebar
+        async function loadCategories() {
+            try {
+                const snapshot = await getDocs(collection(db, 'categories'));
+                const categories = [];
+                snapshot.forEach(doc => {
+                    categories.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Update sidebar categories if we have them
+                if (categories.length > 0) {
+                    const navbarVertical = document.querySelector('#navbar-vertical .navbar-nav');
+                    if (navbarVertical) {
+                        navbarVertical.innerHTML = categories.map(cat => 
+                            `<a href="shop.html?category=${cat.id}" class="nav-item nav-link">${cat.name}</a>`
+                        ).join('');
+                    }
+                }
+            } catch (error) {
+                console.log('Using static categories');
+            }
+        }
+
+        // Create product card HTML
+        function createProductCard(product) {
+            const currency = window.currencySymbol || '$';
+            return `
+                <div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+                    <div class="card product-item border-0 mb-4">
+                        <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                            <img class="img-fluid w-100" src="${product.image || 'img/product-1.jpg'}" alt="${product.name}">
+                        </div>
+                        <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                            <h6 class="text-truncate mb-3">${product.name}</h6>
+                            <div class="d-flex justify-content-center">
+                                <h6>${currency}${parseFloat(product.price).toFixed(2)}</h6>
+                                ${product.originalPrice ? `<h6 class="text-muted ml-2"><del>${currency}${parseFloat(product.originalPrice).toFixed(2)}</del></h6>` : ''}
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between bg-light border">
+                            <a href="detail.html?id=${product.id}" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
+                            <a href="#" class="btn btn-sm text-dark p-0 add-to-cart" data-id="${product.id}"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load featured/trendy products
+        async function loadFeaturedProducts() {
+            try {
+                const snapshot = await getDocs(collection(db, 'products'));
+                const products = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status === 'published') {
+                        products.push({ id: doc.id, ...data });
+                    }
+                });
+                
+                // Get featured products or just the first 8
+                const featured = products.filter(p => p.featured).slice(0, 8);
+                const displayProducts = featured.length >= 4 ? featured : products.slice(0, 8);
+                
+                // Update "Trendy Products" section
+                const trendySection = document.querySelectorAll('.container-fluid.pt-5 .row.px-xl-5.pb-3')[0];
+                if (trendySection && displayProducts.length > 0) {
+                    trendySection.innerHTML = displayProducts.map(p => createProductCard(p)).join('');
+                }
+                
+                // Update "Just Arrived" section (newest products)
+                const sortedByDate = [...products].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+                const justArrived = sortedByDate.slice(0, 8);
+                
+                const justArrivedSection = document.querySelectorAll('.container-fluid.pt-5 .row.px-xl-5.pb-3')[1];
+                if (justArrivedSection && justArrived.length > 0) {
+                    justArrivedSection.innerHTML = justArrived.map(p => createProductCard(p)).join('');
+                }
+                
+            } catch (error) {
+                console.log('Using static products:', error);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadStoreSettings();
+            await loadCategories();
+            await loadFeaturedProducts();
+        });
+    </script>
 </body>
 
 </html>

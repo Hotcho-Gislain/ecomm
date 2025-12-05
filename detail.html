@@ -144,8 +144,7 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="navbar-nav ml-auto py-0">
-                            <a href="" class="nav-item nav-link">Login</a>
-                            <a href="" class="nav-item nav-link">Register</a>
+                            <a href="admin.html" class="nav-item nav-link">Admin</a>
                         </div>
                     </div>
                 </nav>
@@ -583,6 +582,220 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Firebase SDK for Dynamic Product Details -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCp7byyzg3DCorJHrbAPKl_sVzBGT5vtw0",
+            authDomain: "ecommsample-8c169.firebaseapp.com",
+            projectId: "ecommsample-8c169",
+            storageBucket: "ecommsample-8c169.firebasestorage.app",
+            messagingSenderId: "584342335720",
+            appId: "1:584342335720:web:5fa4c181406fda7822995d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get product ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        // Load currency setting
+        async function loadSettings() {
+            try {
+                const settingsDoc = await getDoc(doc(db, 'settings', 'store'));
+                if (settingsDoc.exists()) {
+                    window.currencySymbol = settingsDoc.data().currencySymbol || '$';
+                } else {
+                    window.currencySymbol = '$';
+                }
+            } catch {
+                window.currencySymbol = '$';
+            }
+        }
+
+        // Load product details
+        async function loadProductDetails() {
+            if (!productId) {
+                console.log('No product ID provided');
+                return;
+            }
+
+            try {
+                const productDoc = await getDoc(doc(db, 'products', productId));
+                
+                if (!productDoc.exists()) {
+                    console.log('Product not found');
+                    return;
+                }
+
+                const product = { id: productDoc.id, ...productDoc.data() };
+                const currency = window.currencySymbol || '$';
+
+                // Update product title
+                const titleEl = document.querySelector('.col-lg-7 h3.font-weight-semi-bold');
+                if (titleEl) titleEl.textContent = product.name;
+
+                // Update page header title
+                const headerTitle = document.querySelector('.container-fluid.bg-secondary h1');
+                if (headerTitle) headerTitle.textContent = product.name;
+
+                // Update breadcrumb
+                const breadcrumb = document.querySelector('.container-fluid.bg-secondary p.m-0:last-child');
+                if (breadcrumb) breadcrumb.textContent = product.name;
+
+                // Update price
+                const priceEl = document.querySelector('.col-lg-7 h3.font-weight-semi-bold.mb-4');
+                if (priceEl) {
+                    priceEl.textContent = `${currency}${parseFloat(product.price).toFixed(2)}`;
+                    if (product.originalPrice) {
+                        priceEl.innerHTML += ` <small class="text-muted"><del>${currency}${parseFloat(product.originalPrice).toFixed(2)}</del></small>`;
+                    }
+                }
+
+                // Update description
+                const descEl = document.querySelector('.col-lg-7 p.mb-4');
+                if (descEl) descEl.textContent = product.description || 'No description available.';
+
+                // Update product images
+                const carousel = document.querySelector('#product-carousel .carousel-inner');
+                if (carousel && product.image) {
+                    carousel.innerHTML = `
+                        <div class="carousel-item active">
+                            <img class="w-100 h-100" src="${product.image}" alt="${product.name}">
+                        </div>
+                    `;
+                }
+
+                // Update sizes
+                const sizesContainer = document.querySelector('.d-flex.mb-3 form');
+                if (sizesContainer && product.sizes && product.sizes.length > 0) {
+                    sizesContainer.innerHTML = product.sizes.map((size, i) => `
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="size-${i+1}" name="size" ${i === 0 ? 'checked' : ''}>
+                            <label class="custom-control-label" for="size-${i+1}">${size}</label>
+                        </div>
+                    `).join('');
+                }
+
+                // Update colors
+                const colorsContainer = document.querySelector('.d-flex.mb-4 form');
+                if (colorsContainer && product.colors && product.colors.length > 0) {
+                    colorsContainer.innerHTML = product.colors.map((color, i) => `
+                        <div class="custom-control custom-radio custom-control-inline">
+                            <input type="radio" class="custom-control-input" id="color-${i+1}" name="color" ${i === 0 ? 'checked' : ''}>
+                            <label class="custom-control-label" for="color-${i+1}">${color}</label>
+                        </div>
+                    `).join('');
+                }
+
+                // Update description tab
+                const descTab = document.querySelector('#tab-pane-1 p:first-of-type');
+                if (descTab) descTab.textContent = product.description || 'No description available.';
+
+                // Load related products
+                await loadRelatedProducts(product.category, product.id);
+
+            } catch (error) {
+                console.error('Error loading product:', error);
+            }
+        }
+
+        // Load related products
+        async function loadRelatedProducts(categoryId, currentProductId) {
+            try {
+                const snapshot = await getDocs(collection(db, 'products'));
+                let related = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.status === 'published' && doc.id !== currentProductId) {
+                        related.push({ id: doc.id, ...data });
+                    }
+                });
+
+                // Prefer same category products
+                const sameCategory = related.filter(p => p.category === categoryId);
+                const displayProducts = sameCategory.length >= 5 ? sameCategory.slice(0, 5) : related.slice(0, 5);
+
+                const currency = window.currencySymbol || '$';
+                const relatedContainer = document.querySelector('.related-carousel');
+                
+                if (relatedContainer && displayProducts.length > 0) {
+                    relatedContainer.innerHTML = displayProducts.map(product => `
+                        <div class="card product-item border-0">
+                            <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
+                                <img class="img-fluid w-100" src="${product.image || 'img/product-1.jpg'}" alt="${product.name}">
+                            </div>
+                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
+                                <h6 class="text-truncate mb-3">${product.name}</h6>
+                                <div class="d-flex justify-content-center">
+                                    <h6>${currency}${parseFloat(product.price).toFixed(2)}</h6>
+                                    ${product.originalPrice ? `<h6 class="text-muted ml-2"><del>${currency}${parseFloat(product.originalPrice).toFixed(2)}</del></h6>` : ''}
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between bg-light border">
+                                <a href="detail.html?id=${product.id}" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>View Detail</a>
+                                <a href="#" class="btn btn-sm text-dark p-0 add-to-cart" data-id="${product.id}"><i class="fas fa-shopping-cart text-primary mr-1"></i>Add To Cart</a>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    // Re-initialize owl carousel
+                    if (typeof $ !== 'undefined' && $.fn.owlCarousel) {
+                        $('.related-carousel').owlCarousel('destroy');
+                        $('.related-carousel').owlCarousel({
+                            loop: true,
+                            margin: 30,
+                            nav: false,
+                            autoplay: true,
+                            smartSpeed: 1000,
+                            responsive: {
+                                0: { items: 1 },
+                                576: { items: 2 },
+                                768: { items: 3 },
+                                992: { items: 4 }
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading related products:', error);
+            }
+        }
+
+        // Load categories for sidebar
+        async function loadCategories() {
+            try {
+                const snapshot = await getDocs(collection(db, 'categories'));
+                const categories = [];
+                snapshot.forEach(doc => {
+                    categories.push({ id: doc.id, ...doc.data() });
+                });
+                
+                const navbarVertical = document.querySelector('#navbar-vertical .navbar-nav');
+                if (navbarVertical && categories.length > 0) {
+                    navbarVertical.innerHTML = categories.map(cat => 
+                        `<a href="shop.html?category=${cat.id}" class="nav-item nav-link">${cat.name}</a>`
+                    ).join('');
+                }
+            } catch (error) {
+                console.log('Error loading categories');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSettings();
+            await loadCategories();
+            await loadProductDetails();
+        });
+    </script>
 </body>
 
 </html>
