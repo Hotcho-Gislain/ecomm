@@ -588,10 +588,16 @@
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
+    <!-- Cart Management -->
+    <script src="js/cart.js"></script>
+
     <!-- Firebase SDK for Dynamic Products -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        // Products cache for cart functionality
+        window.productsCache = {};
 
         const firebaseConfig = {
             apiKey: "AIzaSyCp7byyzg3DCorJHrbAPKl_sVzBGT5vtw0",
@@ -696,7 +702,10 @@
                     const data = docSnap.data();
                     console.log('Found product:', data.name, 'Status:', data.status);
                     if (data.status === 'published') {
-                        allProducts.push({ id: docSnap.id, ...data });
+                        const product = { id: docSnap.id, ...data };
+                        allProducts.push(product);
+                        // Cache product for cart functionality
+                        window.productsCache[docSnap.id] = product;
                     }
                 });
                 
@@ -923,6 +932,8 @@
                 } else {
                     productsContainer.innerHTML += filtered.map(p => createProductCard(p)).join('');
                     console.log('Products rendered to shop page');
+                    // Setup cart buttons after rendering
+                    setupCartButtons();
                 }
                 
                 // Add pagination placeholder
@@ -968,12 +979,27 @@
             }
         });
 
+        // Setup add to cart buttons
+        function setupCartButtons() {
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const productId = btn.getAttribute('data-id');
+                    const product = window.productsCache[productId];
+                    if (product) {
+                        Cart.addItem(product);
+                    }
+                });
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Shop page loaded, initializing Firebase...');
             await loadSettings();
             await loadCategories();
             await loadProducts();
+            setupCartButtons();
             console.log('Shop page Firebase initialization complete');
         });
     </script>
