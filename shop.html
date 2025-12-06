@@ -3,17 +3,17 @@
 
 <head>
     <meta charset="utf-8">
-    <title>EShopper - Bootstrap Shop Template</title>
+    <title>Menu - African Delicacies</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free HTML Templates" name="keywords">
-    <meta content="Free HTML Templates" name="description">
+    <meta content="African food menu, dishes, cuisine" name="keywords">
+    <meta content="Browse our full menu of authentic African dishes" name="description">
 
     <!-- Favicon -->
     <link href="img/favicon.ico" rel="icon">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
@@ -23,6 +23,9 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    
+    <!-- African Delicacies Theme -->
+    <link href="css/african-delicacies.css" rel="stylesheet">
 </head>
 
 <body>
@@ -173,119 +176,71 @@
         <div class="row px-xl-5">
             <!-- Shop Sidebar Start -->
             <div class="col-lg-3 col-md-12">
-                <!-- Price Start -->
-                <div class="border-bottom mb-4 pb-4">
-                    <h5 class="font-weight-semi-bold mb-4">Filter by price</h5>
+                <!-- Categories Start -->
+                <div class="border-bottom mb-4 pb-4" style="background: linear-gradient(135deg, #F5E6D3, #fff); border-radius: 15px; padding: 20px !important;">
+                    <h5 class="font-weight-semi-bold mb-4" style="font-family: 'Playfair Display', serif; color: #5D4037;">
+                        <i class="fas fa-utensils mr-2 text-primary"></i>Menu Categories
+                    </h5>
+                    <div id="category-filters">
+                        <a href="shop.html" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-th-large mr-2 text-primary"></i>All Dishes</span>
+                        </a>
+                        <a href="shop.html?category=main" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-drumstick-bite mr-2 text-primary"></i>Main Dishes</span>
+                        </a>
+                        <a href="shop.html?category=soups" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-bowl-hot mr-2 text-primary"></i>Soups & Stews</span>
+                        </a>
+                        <a href="shop.html?category=grills" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-fire mr-2 text-primary"></i>Grilled & BBQ</span>
+                        </a>
+                        <a href="shop.html?category=sides" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-leaf mr-2 text-primary"></i>Sides</span>
+                        </a>
+                        <a href="shop.html?category=drinks" class="d-flex align-items-center justify-content-between mb-3 text-dark category-link">
+                            <span><i class="fas fa-glass-whiskey mr-2 text-primary"></i>Drinks</span>
+                        </a>
+                        <a href="shop.html?category=desserts" class="d-flex align-items-center justify-content-between text-dark category-link">
+                            <span><i class="fas fa-cookie mr-2 text-primary"></i>Desserts</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Categories End -->
+                
+                <!-- Price Filter Start -->
+                <div class="border-bottom mb-4 pb-4" style="background: linear-gradient(135deg, #fff, #F5E6D3); border-radius: 15px; padding: 20px !important;">
+                    <h5 class="font-weight-semi-bold mb-4" style="font-family: 'Playfair Display', serif; color: #5D4037;">
+                        <i class="fas fa-dollar-sign mr-2 text-primary"></i>Price Range
+                    </h5>
                     <form>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" checked id="price-all">
-                            <label class="custom-control-label" for="price-all">All Price</label>
-                            <span class="badge border font-weight-normal">1000</span>
+                            <label class="custom-control-label" for="price-all">All Prices</label>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-1">
-                            <label class="custom-control-label" for="price-1">$0 - $100</label>
-                            <span class="badge border font-weight-normal">150</span>
+                            <label class="custom-control-label" for="price-1">Under $10</label>
                         </div>
                         <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                             <input type="checkbox" class="custom-control-input" id="price-2">
-                            <label class="custom-control-label" for="price-2">$100 - $200</label>
-                            <span class="badge border font-weight-normal">295</span>
+                            <label class="custom-control-label" for="price-2">$10 - $20</label>
                         </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
                             <input type="checkbox" class="custom-control-input" id="price-3">
-                            <label class="custom-control-label" for="price-3">$200 - $300</label>
-                            <span class="badge border font-weight-normal">246</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="price-4">
-                            <label class="custom-control-label" for="price-4">$300 - $400</label>
-                            <span class="badge border font-weight-normal">145</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-                            <input type="checkbox" class="custom-control-input" id="price-5">
-                            <label class="custom-control-label" for="price-5">$400 - $500</label>
-                            <span class="badge border font-weight-normal">168</span>
+                            <label class="custom-control-label" for="price-3">$20+</label>
                         </div>
                     </form>
                 </div>
-                <!-- Price End -->
-                
-                <!-- Color Start -->
-                <div class="border-bottom mb-4 pb-4">
-                    <h5 class="font-weight-semi-bold mb-4">Filter by color</h5>
-                    <form>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" checked id="color-all">
-                            <label class="custom-control-label" for="price-all">All Color</label>
-                            <span class="badge border font-weight-normal">1000</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="color-1">
-                            <label class="custom-control-label" for="color-1">Black</label>
-                            <span class="badge border font-weight-normal">150</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="color-2">
-                            <label class="custom-control-label" for="color-2">White</label>
-                            <span class="badge border font-weight-normal">295</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="color-3">
-                            <label class="custom-control-label" for="color-3">Red</label>
-                            <span class="badge border font-weight-normal">246</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="color-4">
-                            <label class="custom-control-label" for="color-4">Blue</label>
-                            <span class="badge border font-weight-normal">145</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-                            <input type="checkbox" class="custom-control-input" id="color-5">
-                            <label class="custom-control-label" for="color-5">Green</label>
-                            <span class="badge border font-weight-normal">168</span>
-                        </div>
-                    </form>
-                </div>
-                <!-- Color End -->
+                <!-- Price Filter End -->
 
-                <!-- Size Start -->
-                <div class="mb-5">
-                    <h5 class="font-weight-semi-bold mb-4">Filter by size</h5>
-                    <form>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" checked id="size-all">
-                            <label class="custom-control-label" for="size-all">All Size</label>
-                            <span class="badge border font-weight-normal">1000</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="size-1">
-                            <label class="custom-control-label" for="size-1">XS</label>
-                            <span class="badge border font-weight-normal">150</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="size-2">
-                            <label class="custom-control-label" for="size-2">S</label>
-                            <span class="badge border font-weight-normal">295</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="size-3">
-                            <label class="custom-control-label" for="size-3">M</label>
-                            <span class="badge border font-weight-normal">246</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                            <input type="checkbox" class="custom-control-input" id="size-4">
-                            <label class="custom-control-label" for="size-4">L</label>
-                            <span class="badge border font-weight-normal">145</span>
-                        </div>
-                        <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-                            <input type="checkbox" class="custom-control-input" id="size-5">
-                            <label class="custom-control-label" for="size-5">XL</label>
-                            <span class="badge border font-weight-normal">168</span>
-                        </div>
-                    </form>
+                <!-- Special Offers Start -->
+                <div class="mb-5 p-4 text-center" style="background: linear-gradient(135deg, #C45C26, #D4A853); border-radius: 15px;">
+                    <span style="font-size: 2rem;">🌶️</span>
+                    <h5 class="text-white mt-2">Today's Special</h5>
+                    <p class="text-white small mb-2">Get 15% off on all Jollof Rice dishes!</p>
+                    <a href="shop.html?category=specials" class="btn btn-light btn-sm" style="border-radius: 20px;">View Specials</a>
                 </div>
-                <!-- Size End -->
+                <!-- Special Offers End -->
             </div>
             <!-- Shop Sidebar End -->
 
